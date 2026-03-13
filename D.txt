@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>品質主管與科主任區塊預覽</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #f3f4f6;
+      font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+      color: #222;
+    }
+
+    .page {
+      max-width: 1480px;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid #888;
+    }
+
+    table.form-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 15px;
+    }
+
+    .form-table td {
+      border: 1px solid #666;
+      vertical-align: middle;
+      padding: 4px 6px;
+      background: #efefef;
+    }
+
+    .section-head {
+      color: #e11d48;
+      font-weight: 700;
+      background: #ffffff !important;
+      text-align: left;
+      padding: 6px 8px;
+    }
+
+    .label-cell {
+      width: 190px;
+      background: #e9e2c8 !important;
+      text-align: center;
+      font-weight: 600;
+      color: #444;
+      line-height: 1.5;
+      white-space: nowrap;
+    }
+
+    .top-checks {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 8px 18px;
+      align-items: center;
+    }
+
+    .top-checks label,
+    .check-col label,
+    .inline-options label,
+    .director-row label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    textarea {
+      width: 100%;
+      border: 1px solid #c7c7c7;
+      background: #fff;
+      font-size: 15px;
+      padding: 6px 8px;
+      font-family: inherit;
+    }
+
+    textarea {
+      /* 將原本的 84px 增加至 160px，實現「往下拉」的視覺需求，且未設定 maxlength 以確保不限字數 */
+      min-height: 160px; 
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .assign-row {
+      display: grid;
+      grid-template-columns: 220px 260px 42px 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .mini-btn {
+      height: 34px;
+      border: 1px solid #999;
+      background: #e5e7eb;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .measure-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 0;
+      min-height: 150px;
+    }
+
+    .measure-left,
+    .measure-right {
+      padding: 6px 8px;
+    }
+
+    .measure-left {
+      border-right: 1px solid #666;
+    }
+
+    .check-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .inline-field {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .inline-field-name {
+      display: grid;
+      grid-template-columns: 60px 1fr;
+      gap: 8px;
+      align-items: center;
+      margin-top: 2px;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 0;
+      min-height: 150px;
+    }
+
+    .result-left,
+    .result-right {
+      padding: 6px 8px;
+    }
+
+    .result-left {
+      border-right: 1px solid #666;
+    }
+
+    .date-line {
+      display: grid;
+      grid-template-columns: 70px 1fr;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .result-left .check-col label {
+      margin-bottom: 3px;
+    }
+
+    .effect-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 0;
+      min-height: 82px;
+    }
+
+    .effect-left,
+    .effect-right {
+      padding: 6px 8px;
+    }
+
+    .effect-left {
+      border-right: 1px solid #666;
+    }
+
+    .inline-options {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .effect-row {
+      display: grid;
+      grid-template-columns: 220px 80px auto auto auto auto 1fr;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .explain-block {
+      display: grid;
+      grid-template-columns: 70px 1fr;
+      gap: 8px;
+      align-items: start;
+    }
+
+    .note-area {
+      margin: 10px auto 14px;
+      max-width: 1480px;
+      font-size: 18px;
+      color: #e11d48;
+      font-weight: bold;
+    }
+
+    .director-wrap {
+      max-width: 1480px;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid #666;
+      border-top: 3px solid #444;
+    }
+
+    .director-title {
+      color: #e11d48;
+      font-weight: 700;
+      padding: 8px 12px;
+      border-bottom: 1px solid #666;
+      font-size: 18px;
+      background: #fff;
+    }
+
+    .director-row {
+      padding: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 28px;
+      align-items: center;
+      background: #efefef;
+    }
+
+    @media (max-width: 1200px) {
+      .measure-grid,
+      .result-grid,
+      .effect-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .measure-left,
+      .result-left,
+      .effect-left {
+        border-right: none;
+        border-bottom: 1px solid #666;
+      }
+
+      .assign-row,
+      .effect-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <table class="form-table">
+      <tr>
+        <td class="section-head" colspan="6">品質主管</td>
+      </tr>
+
+      <tr>
+        <td colspan="6">
+          <div class="top-checks">
+            <label><input type="checkbox" checked> 同意立即處理措施</label>
+            <label><input type="checkbox" checked> 請填寫矯正措施如下</label>
+          </div>
+          <div class="explain-block" style="margin-top: 12px;">
+            <span>請說明：</span>
+            <textarea style="min-height: 84px;"></textarea>
+          </div>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="section-head" colspan="6">矯正措施</td>
+      </tr>
+
+      <tr>
+        <td class="label-cell">指派權責人員</td>
+        <td colspan="5">
+          <div class="assign-row">
+            <input type="text" value="T56287" placeholder="員代" />
+            <input type="text" value="" placeholder="姓名" />
+            <button type="button" class="mini-btn">…</button>
+            <div></div>
+          </div>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="label-cell">決定與實施的<br>矯正措施</td>
+        <td colspan="5" style="padding:0;">
+          <div class="measure-grid">
+            <div class="measure-left">
+              <div class="check-col">
+                <label><input type="checkbox" checked> 修改文件名稱</label>
+                <label><input type="checkbox"> 修改資訊程式</label>
+                <label><input type="checkbox"> 調整作業流程</label>
+                <label><input type="checkbox"> 進行教育訓練</label>
+                <label><input type="checkbox"> 以RCA或PDCA檢討</label>
+                <label><input type="checkbox"> 其他</label>
+              </div>
+            </div>
+
+            <div class="measure-right">
+              <div class="explain-block">
+                <span>請說明：</span>
+                <!-- 不限字數，且高度已加大 -->
+                <textarea></textarea>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="label-cell">矯正措施<br>結果確認</td>
+        <td colspan="5" style="padding:0;">
+          <div class="result-grid">
+            <div class="result-left">
+              <div class="check-col">
+                <div style="display: flex; justify-content: flex-start; align-items: center;">
+                  <label style="width: 160px;"><input type="checkbox" checked> 修改文件完成</label>
+                  <input type="date" style="width: 160px; font-size: 14px; padding: 4px;" />
+                </div>
+                <div style="display: flex; justify-content: flex-start; align-items: center;">
+                  <label style="width: 160px;"><input type="checkbox"> 資訊程式修改完成</label>
+                  <input type="date" style="width: 160px; font-size: 14px; padding: 4px;" />
+                </div>
+                <div style="display: flex; justify-content: flex-start; align-items: center;">
+                  <label style="width: 160px;"><input type="checkbox"> 調整作業流程完成</label>
+                  <input type="date" style="width: 160px; font-size: 14px; padding: 4px;" />
+                </div>
+                <div style="display: flex; justify-content: flex-start; align-items: center;">
+                  <label style="width: 160px;"><input type="checkbox"> 教育訓練完成</label>
+                  <input type="date" style="width: 160px; font-size: 14px; padding: 4px;" />
+                </div>
+                <div style="display: flex; justify-content: flex-start; align-items: center;">
+                  <label style="width: 160px;"><input type="checkbox"> 其他</label>
+                  <input type="date" style="width: 160px; font-size: 14px; padding: 4px;" />
+                </div>
+              </div>
+            </div>
+
+            <div class="result-right">
+              <div class="explain-block" style="margin-bottom:8px;">
+                <span>請說明：</span>
+                <!-- 不限字數，且高度已加大 -->
+                <textarea></textarea>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="label-cell">矯正措施<br>有效性確認</td>
+        <td colspan="5" style="padding:0;">
+          <div class="effect-grid">
+            <div class="effect-left">
+              <div class="check-col">
+                <label><input type="checkbox" checked> 考核結果合格</label>
+                
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <label><input type="checkbox"> 相同事件再發生機率</label>
+                  <div style="display: flex; align-items: center; gap: 8px; padding-left: 24px;">
+                    <input type="text" style="width: 80px; padding: 4px; height: 30px;" />
+                    <span>次</span>
+                    <label style="margin-left: 8px;"><input type="radio" name="freq_unit"> 日</label>
+                    <label><input type="radio" name="freq_unit"> 月</label>
+                    <label><input type="radio" name="freq_unit"> 年</label>
+                  </div>
+                </div>
+
+                <label><input type="checkbox"> 其他</label>
+              </div>
+            </div>
+
+            <div class="effect-right">
+              <div class="explain-block">
+                <span>請說明：</span>
+                <!-- 不限字數，且高度已加大 -->
+                <textarea></textarea>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="director-wrap">
+    <div class="director-title">科 主 任</div>
+    <div class="director-row">
+      <label><input type="checkbox"> 結案</label>
+      <label><input type="checkbox" checked> 結案,但須納入年度內部稽核作業</label>
+      <div class="explain-block" style="width: 100%; margin-top: 8px;">
+        <span>請說明：</span>
+        <!-- 延續上方設定，不限字數且具備較大的預設高度 -->
+        <textarea></textarea>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

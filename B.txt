@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>整合不符合表單預覽</title>
+  <style>
+    /* CSS Reset & Variables */
+    :root {
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg-color: #f3f4f6;
+      --card-bg: #ffffff;
+      --text-main: #1f2937;
+      --text-muted: #4b5563;
+      --border-color: #d1d5db;
+      --label-bg: #fef3c7; /* 柔和的黃色背景 */
+      --danger-color: #dc2626;
+      --focus-ring: rgba(37, 99, 235, 0.3);
+    }
+
+    * { 
+      box-sizing: border-box; 
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg-color);
+      font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+      color: var(--text-main);
+      padding: 16px;
+      line-height: 1.5;
+    }
+
+    /* 頁面主體 */
+    .page {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+
+    /* 工具列 */
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(243, 244, 246, 0.95);
+      backdrop-filter: blur(4px);
+      padding: 12px 0 16px;
+      display: flex;
+      gap: 12px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-draft {
+      background: #e5e7eb;
+      color: #111827;
+      border: 1px solid #d1d5db;
+    }
+
+    .btn-draft:hover {
+      background: #d1d5db;
+    }
+
+    .btn-submit {
+      background: var(--primary-color);
+      color: #fff;
+      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn-submit:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    /* 表格設計 */
+    table.form-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 15px;
+    }
+
+    .form-table td {
+      border: 1px solid var(--border-color);
+      vertical-align: top;
+      padding: 12px 16px;
+      background: #fafafa;
+    }
+
+    .label-cell {
+      width: 160px;
+      background: var(--label-bg) !important;
+      text-align: right;
+      font-weight: 600;
+      color: #374151;
+      vertical-align: middle !important;
+    }
+
+    .section-title {
+      color: var(--danger-color);
+      font-weight: 700;
+      font-size: 16px;
+      background: #ffffff !important;
+      padding: 16px !important;
+    }
+
+    .req {
+      color: var(--danger-color);
+      font-weight: 700;
+      margin-right: 4px;
+    }
+
+    /* 表單元件 */
+    input[type="text"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: #fff;
+      font-size: 15px;
+      padding: 8px 12px;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+      line-height: 1.6;
+    }
+
+    /* 單選框與核取方塊排版 */
+    .radio-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+      padding-bottom: 12px;
+    }
+
+    .radio-grid label,
+    .inline-radios label,
+    .impact-line label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    input[type="radio"],
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary-color);
+      cursor: pointer;
+    }
+
+    .inline-radios {
+      margin-bottom: 10px;
+    }
+
+    .sub-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .sub-field {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .sub-field label {
+      white-space: nowrap;
+      min-width: 120px;
+      color: var(--text-muted);
+    }
+
+    .text-inline {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .text-inline label {
+      white-space: nowrap;
+      color: var(--text-muted);
+    }
+
+    /* 動態新增列 */
+    .notify-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      background: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    .notify-row label {
+      white-space: nowrap;
+    }
+
+    .mini-btn {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-color);
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .mini-btn:hover {
+      background: #e5e7eb;
+      color: var(--text-main);
+    }
+
+    .mini-btn-add {
+      background: #dbeafe;
+      color: var(--primary-color);
+      border-color: #bfdbfe;
+    }
+    
+    .mini-btn-add:hover {
+      background: #bfdbfe;
+    }
+
+    .mini-btn-remove {
+      background: #fee2e2;
+      color: var(--danger-color);
+      border-color: #fecaca;
+    }
+
+    .mini-btn-remove:hover {
+      background: #fecaca;
+    }
+
+    /* 影響區域 */
+    .impact-area {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .impact-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      background: #fff;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px dashed var(--border-color);
+    }
+
+    .impact-line .note-red {
+      color: var(--danger-color);
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .impact-line input[type="text"] {
+      width: 80px;
+      text-align: center;
+    }
+
+    /* RWD 響應式設定 */
+    @media (max-width: 768px) {
+      body { padding: 12px; }
+      
+      .form-table, .form-table tbody, .form-table tr, .form-table td {
+        display: block;
+        width: 100%;
+      }
+      
+      .label-cell {
+        text-align: left;
+        border-bottom: none;
+        padding-bottom: 4px;
+      }
+      
+      .form-table td:not(.label-cell) {
+        border-top: none;
+        padding-top: 8px;
+        margin-bottom: 12px;
+        background: #fff;
+      }
+      
+      .sub-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .notify-row {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button class="btn btn-draft" type="button" onclick="alert('預覽版：儲存草稿')">儲存草稿</button>
+    <button class="btn btn-submit" type="button" onclick="alert('預覽版：送出')">送出表單</button>
+  </div>
+
+  <div class="page">
+    <table class="form-table">
+      <tbody>
+        <tr>
+          <td class="section-title" colspan="6">事件描述</td>
+        </tr>
+
+        <tr>
+          <td class="label-cell"><span class="req">*</span>發生地點</td>
+          <td colspan="5">
+            <select>
+              <option selected>精準分生組</option>
+              <option>請選擇</option>
+            </select>
+          </td>
+        </tr>
+
+        <tr>
+          <td class="label-cell"><span class="req">*</span>發生組別</td>
+          <td colspan="5">
+            <select>
+              <option selected>請選擇</option>
+              <option>精準分生組</option>
+            </select>
+          </td>
+        </tr>
+
+        <tr>
+          <td class="label-cell"><span class="req">*</span>發生日</td>
+          <td colspan="5">
+            <input type="date" value="2025-09-01" />
+          </td>
+        </tr>
+
+        <tr>
+          <td class="label-cell"><span class="req">*</span>事件來源</td>
+          <td colspan="5">
+            <div class="radio-grid">
+              <label><input type="checkbox" name="source"> 更改報告</label>
+              <label><input type="checkbox" name="source"> 病安事件</label>
+              <label><input type="checkbox" name="source"> 申訴抱怨事件</label>
+              <label><input type="checkbox" name="source"> 異動檢驗單狀態</label>
+              <label><input type="checkbox" name="source"> 檢體程序</label>
+              <label><input type="checkbox" name="source"> 檢體問題</label>
+              <label><input type="checkbox" name="source"> 儀器設備故障</label>
+              <label><input type="checkbox" name="source"> 環境安全衛生</label>
+              <label><input type="checkbox" name="source"> 試劑耗材不良</label>
+              <label><input type="checkbox" name="source"> 品質指標異常</label>
+              <label><input type="checkbox" name="source"> 外部稽核</label>
+              <label><input type="checkbox" name="source"> 危險值未通報</label>
+              <label><input type="checkbox" name="source" checked> 其他</label>
+            </div>
+            <div class="text-inline">
+              <label>其他，請說明：</label>
+              <input type="text" value="" />
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <td class="label-cell">狀況描述</td>
+          <td colspan="5">
+            <textarea placeholder="請詳細描述事件狀況..." rows="5"></textarea>
+          </td>
+        </tr>
+
+        <tr>
+          <td class="label-cell">立即處理措施</td>
+          <td colspan="5">
+            <div class="sub-row">
+              <div class="action-options">
+                <div class="inline-radios">
+                  <label><input type="radio" name="action"> 通知醫師，召回或修改報告</label>
+                </div>
+                <div class="inline-radios">
+                  <label><input type="radio" name="action"> 通知重新採檢</label>
+                </div>
+                <div class="inline-radios">
+                  <label><input type="radio" name="action"> 抱怨事件已回覆</label>
+                </div>
+                <div class="inline-radios">
+                  <label><input type="radio" name="action"> 停止檢驗，留置報告</label>
+                </div>
+                <div class="inline-radios">
+                  <label><input type="radio" name="action" checked> 其他</label>
+                </div>
+              </div>
+
+              <div class="action-details">
+                <div class="sub-field">
+                  <label>停止時間</label>
+                  <input type="date" value="" />
+                </div>
+                <div class="sub-field">
+                  <label>組長指示再開始</label>
+                  <input type="date" value="" />
+                </div>
+              </div>
+            </div>
+            
+            <!-- 將「請說明」移出 sub-row 網格，放置在整個 td 的底部，使其能 100% 滿版貼齊右側 -->
+            <div style="margin-top: 12px; padding-left: 24px;">
+              <label style="display: block; margin-bottom: 6px; color: var(--text-muted);">請說明：</label>
+              <textarea placeholder="請輸入詳細說明..." rows="5" style="width: 100%;"></textarea>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <td class="label-cell">留置或修改報告<br>通知臨床人員</td>
+          <td colspan="5">
+            <div id="notifyList">
+              <div class="notify-row">
+                <label>員工代號：</label>
+                <input type="text" placeholder="請輸入代號" />
+                <button type="button" class="mini-btn mini-btn-add" onclick="addNotifyRow()" title="新增人員">+</button>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <td class="label-cell">對先前病人的影響</td>
+          <td colspan="5">
+            <div class="impact-area">
+              <div class="impact-line">
+                <!-- 為主選項加入 id 以便連動 -->
+                <label><input type="radio" name="impact" id="no-impact-main"> 無影響</label>
+                <div style="width:1px; height:20px; background:#d1d5db; margin:0 8px;"></div>
+                <!-- 更改 name 解除互斥，並加入 onclick 連動勾選主選項 -->
+                <label><input type="radio" name="no_impact_reason" onclick="document.getElementById('no-impact-main').checked = true;"> 未涉及檢驗流程</label>
+                <label><input type="radio" name="no_impact_reason" onclick="document.getElementById('no-impact-main').checked = true;"> 未影響之前檢驗結果</label>
+              </div>
+
+              <div class="impact-line">
+                <label><input type="radio" name="impact"> 有影響，請說明：</label>
+                <span>檢體回溯共</span>
+                <input type="text" value="" />
+                <span>筆，修改報告共</span>
+                <input type="text" value="" />
+                <span>筆</span>
+                <span class="note-red">（需檢附清單）</span>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <td class="label-cell">補充說明</td>
+          <td colspan="5">
+            <textarea placeholder="請輸入補充說明..." rows="5"></textarea>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function addNotifyRow() {
+      const wrap = document.getElementById("notifyList");
+      const row = document.createElement("div");
+      row.className = "notify-row";
+      row.innerHTML = `
+        <label>員工代號：</label>
+        <input type="text" placeholder="請輸入代號" />
+        <button type="button" class="mini-btn mini-btn-remove" onclick="removeNotifyRow(this)" title="移除人員">-</button>
+      `;
+      wrap.appendChild(row);
+    }
+
+    function removeNotifyRow(btn) {
+      const row = btn.closest(".notify-row");
+      if (row) {
+        // 加入簡單的淡出動畫效果後再移除
+        row.style.transition = "opacity 0.2s";
+        row.style.opacity = "0";
+        setTimeout(() => row.remove(), 200);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>品保組區塊預覽 (優化版)</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #f3f4f6;
+      font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+      color: #222;
+    }
+
+    .page {
+      max-width: 1480px;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid #888;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    table.form-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 15px;
+    }
+
+    .form-table td {
+      border: 1px solid #666;
+      vertical-align: middle;
+      padding: 6px 8px;
+      background: #efefef;
+    }
+
+    .section-head {
+      color: #e11d48;
+      font-weight: 700;
+      background: #ffffff !important;
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 16px;
+    }
+
+    .label-cell {
+      width: 220px;
+      background: #e9e2c8 !important;
+      text-align: center;
+      font-weight: 600;
+      color: #444;
+      line-height: 1.5;
+      white-space: nowrap;
+    }
+
+    .top-checks {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 18px;
+      align-items: center;
+      padding: 4px 0;
+    }
+
+    .top-checks label,
+    .radio-col label,
+    .status-list label,
+    .risk-options label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    textarea,
+    input[type="text"] {
+      width: 100%;
+      border: 1px solid #c7c7c7;
+      background: #fff;
+      font-size: 15px;
+      padding: 8px;
+      font-family: inherit;
+      border-radius: 4px;
+      transition: border-color 0.2s;
+    }
+    
+    textarea:focus,
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #e11d48;
+    }
+
+    textarea {
+      min-height: 130px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .impact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+
+    .impact-col {
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .impact-col:nth-child(odd) {
+      border-right: 1px solid #666;
+    }
+
+    .impact-col:nth-child(1),
+    .impact-col:nth-child(2) {
+      border-bottom: 1px solid #666;
+    }
+
+    .radio-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .other-input-wrap {
+      margin-top: 12px;
+    }
+
+    .small-note {
+      margin-bottom: 4px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .risk-row {
+      display: grid;
+      grid-template-columns: 220px 1fr 330px;
+      gap: 0;
+      align-items: stretch;
+    }
+
+    .risk-row > div {
+      border-right: 1px solid #666;
+      padding: 6px 12px;
+      background: #efefef;
+    }
+
+    .risk-row > div:last-child {
+      border-right: none;
+    }
+
+    .risk-center {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .risk-right {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .risk-options {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .score-row {
+      display: grid;
+      grid-template-columns: 220px 120px 1fr;
+      gap: 0;
+    }
+
+    .score-row > div {
+      border-right: 1px solid #666;
+      padding: 6px 12px;
+      background: #efefef;
+      display: flex;
+      align-items: center;
+    }
+
+    .score-row > div:last-child {
+      border-right: none;
+    }
+    
+    #total-score {
+      font-size: 18px;
+      font-weight: 700;
+      color: #e11d48;
+    }
+
+    .note-red {
+      color: #ef4444;
+      font-weight: 700;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    .status-wrap {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 0;
+    }
+
+    .status-wrap > div {
+      border-right: 1px solid #666;
+      padding: 8px 12px;
+      background: #efefef;
+    }
+
+    .status-wrap > div:last-child {
+      border-right: none;
+    }
+
+    .status-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 95px;
+      justify-content: center;
+    }
+
+    @media (max-width: 1200px) {
+      .risk-row {
+        grid-template-columns: 1fr;
+      }
+      .risk-right { justify-content: flex-start; }
+      .score-row, .status-wrap { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .top-checks, .impact-grid { grid-template-columns: 1fr; }
+      .impact-col {
+        border-right: none !important;
+        border-bottom: 1px solid #666 !important;
+      }
+      .impact-col:last-child { border-bottom: none !important; }
+      .label-cell { width: 150px; white-space: normal; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <table class="form-table">
+      <tr>
+        <td class="section-head" colspan="6">品保組</td>
+      </tr>
+
+      <tr>
+        <td colspan="6">
+          <div class="top-checks">
+            <label><input type="checkbox" name="qa_action" value="agree"> 同意上述事件說明與調查</label>
+            <label><input type="checkbox" name="qa_action" value="assign"> 加簽指派人員補充說明</label>
+            <label><input type="checkbox" name="qa_action" value="other"> 其他</label>
+            <div></div>
+          </div>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="label-cell">補充說明</td>
+        <td colspan="5">
+          <textarea name="qa_note" placeholder="請輸入補充說明"></textarea>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="label-cell">對先前病人的影響</td>
+        <td colspan="5" style="padding:0;">
+          <div class="impact-grid">
+            <!-- 1. 檢驗前 (複選) -->
+            <div class="impact-col">
+              <div class="radio-col">
+                <label style="font-weight: bold; color: #b91c1c;">檢驗前</label>
+                <label><input type="checkbox" name="impact_pre" value="pre_1"> 檢體採集錯誤</label>
+                <label><input type="checkbox" name="impact_pre" value="pre_2"> 病人記錄錯誤</label>
+                <label><input type="checkbox" name="impact_pre" value="pre_3"> 病人辨識錯誤</label>
+                <label><input type="checkbox" name="impact_pre" value="pre_4"> 溝通問題</label>
+                <label><input type="checkbox" name="impact_pre" value="pre_5"> 流程問題</label>
+                <label><input type="checkbox" name="impact_pre" id="pre_other_checkbox" value="pre_other"> 其他</label>
+              </div>
+              <div class="other-input-wrap">
+                <div class="small-note">請說明：</div>
+                <input type="text" name="pre_other_desc" data-target="pre_other_checkbox" placeholder="若選其他請填寫" />
+              </div>
+            </div>
+
+            <!-- 2. 檢驗中 (複選) -->
+            <div class="impact-col">
+              <div class="radio-col">
+                <label style="font-weight: bold; color: #b91c1c;">檢驗中</label>
+                <label><input type="checkbox" name="impact_in" value="in_1"> 人員未依規範操作</label>
+                <label><input type="checkbox" name="impact_in" value="in_2"> 分裝錯誤</label>
+                <label><input type="checkbox" name="impact_in" value="in_3"> 儀器或品管異常</label>
+                <label><input type="checkbox" name="impact_in" value="in_4"> 方法學差異</label>
+                <label><input type="checkbox" name="impact_in" id="in_other_checkbox" value="in_other"> 其他</label>
+              </div>
+              <div class="other-input-wrap">
+                <div class="small-note">請說明：</div>
+                <input type="text" name="in_other_desc" data-target="in_other_checkbox" placeholder="若選其他請填寫" />
+              </div>
+            </div>
+
+            <!-- 3. 檢驗後 (複選) -->
+            <div class="impact-col">
+              <div class="radio-col">
+                <label style="font-weight: bold; color: #b91c1c;">檢驗後</label>
+                <label><input type="checkbox" name="impact_post" value="post_1"> 結果判讀錯誤</label>
+                <label><input type="checkbox" name="impact_post" value="post_2"> 抄寫或輸入錯誤</label>
+                <!-- 已修正為 誤發成完整報告 -->
+                <label><input type="checkbox" name="impact_post" value="post_3"> 誤發成完整報告</label>
+                <label><input type="checkbox" name="impact_post" value="post_4"> 未確認核對報告</label>
+                <label><input type="checkbox" name="impact_post" id="post_other_checkbox" value="post_other"> 其他</label>
+              </div>
+              <div class="other-input-wrap">
+                <div class="small-note">請說明：</div>
+                <input type="text" name="post_other_desc" data-target="post_other_checkbox" placeholder="若選其他請填寫" />
+              </div>
+            </div>
+
+            <!-- 4. 其他 (複選) -->
+            <div class="impact-col">
+              <div class="radio-col">
+                <label style="font-weight: bold; color: #b91c1c;">其他</label>
+                <label><input type="checkbox" name="impact_other" value="other_1"> 試劑</label>
+                <label><input type="checkbox" name="impact_other" value="other_2"> 環境</label>
+                <label><input type="checkbox" name="impact_other" value="other_3"> 資訊程式</label>
+                <label><input type="checkbox" name="impact_other" value="other_4"> 醫師要求</label>
+                <label><input type="checkbox" name="impact_other" id="misc_other_checkbox" value="other_5"> 其他</label>
+              </div>
+              <div class="other-input-wrap">
+                <div class="small-note">請說明：</div>
+                <input type="text" name="patient_impact_other_desc" data-target="misc_other_checkbox" placeholder="若選其他請填寫" />
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="6" style="padding:0;">
+          <div class="risk-row">
+            <div class="label-cell" style="width:auto;border-right:1px solid #666;">風險評估</div>
+            <div class="risk-center">
+              <span>嚴重程度：</span>
+              <div class="risk-options">
+                <label><input type="radio" name="severity" value="1"> 1</label>
+                <label><input type="radio" name="severity" value="2"> 2</label>
+                <label><input type="radio" name="severity" value="3"> 3</label>
+                <label><input type="radio" name="severity" value="4" checked> 4</label>
+              </div>
+            </div>
+            <div class="risk-right">
+              <span>發生率：</span>
+              <div class="risk-options">
+                <label><input type="radio" name="frequency" value="1" checked> 1</label>
+                <label><input type="radio" name="frequency" value="2"> 2</label>
+                <label><input type="radio" name="frequency" value="3"> 3</label>
+                <label><input type="radio" name="frequency" value="4"> 4</label>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="6" style="padding:0;">
+          <div class="score-row">
+            <div class="label-cell" style="width:auto;border-right:1px solid #666;">總分</div>
+            <div id="total-score" style="justify-content: center;">4</div>
+            <div>計算方式 = 嚴重程度 × 發生率</div>
+          </div>
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="6" style="padding:0;">
+          <div class="status-wrap">
+            <div class="label-cell" style="width:auto;border-right:1px solid #666;">狀態</div>
+            <div>
+              <div class="status-list">
+                <label><input type="checkbox" name="status" id="status-accept" value="accept"> 可接受風險，結案</label>
+                <label><input type="checkbox" name="status" id="status-reject" value="reject"> 總分 &gt; 6 分為不可接收風險，請填寫矯正措施</label>
+                <label><input type="checkbox" name="status" value="corrective"> 權責組別填寫矯正措施</label>
+                <label><input type="checkbox" name="status" value="meeting"> 跨科部/系統性問題召開不符合事件檢討會議</label>
+              </div>
+              <div class="note-red">（請檢附會議紀錄）</div>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const severityRadios = document.querySelectorAll('input[name="severity"]');
+      const frequencyRadios = document.querySelectorAll('input[name="frequency"]');
+      const scoreDisplay = document.getElementById('total-score');
+      const statusAccept = document.getElementById('status-accept');
+      const statusReject = document.getElementById('status-reject');
+
+      function calculateScore() {
+        let severity = 0;
+        let frequency = 0;
+        severityRadios.forEach(radio => { if (radio.checked) severity = parseInt(radio.value); });
+        frequencyRadios.forEach(radio => { if (radio.checked) frequency = parseInt(radio.value); });
+        const totalScore = severity * frequency;
+        scoreDisplay.textContent = totalScore;
+        if (severity === 0 || frequency === 0) { scoreDisplay.textContent = "0"; return; }
+        if (totalScore > 6) { statusReject.checked = true; statusAccept.checked = false; } 
+        else { statusAccept.checked = true; statusReject.checked = false; }
+      }
+
+      severityRadios.forEach(radio => radio.addEventListener('change', calculateScore));
+      frequencyRadios.forEach(radio => radio.addEventListener('change', calculateScore));
+      calculateScore();
+      
+      const otherInputFields = document.querySelectorAll('.other-input-wrap input[type="text"]');
+      otherInputFields.forEach(input => {
+          input.addEventListener('input', function() {
+              const targetId = this.getAttribute('data-target');
+              const targetCheckbox = document.getElementById(targetId);
+              if(this.value.trim() !== "") {
+                  targetCheckbox.checked = true;
+              }
+          });
+      });
+    });
+  </script>
+</body>
+</html>
